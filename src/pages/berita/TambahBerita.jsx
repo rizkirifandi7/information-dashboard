@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
 	DialogContent,
 	DialogDescription,
@@ -17,10 +18,17 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import { formatDateToISO } from "@/lib/formatDate";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import axios from "axios";
-import { PlusCircle } from "lucide-react";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -30,7 +38,7 @@ const FormSchema = z.object({
 	judul: z.string().nonempty("Judul harus diisi."),
 	deskripsi: z.string().nonempty("Deskripsi harus diisi."),
 	gambar: z.any(),
-	tanggal: z.string().nonempty("Tanggal harus diisi."),
+	tanggal: z.any(),
 });
 
 const TambahBerita = ({ fetchData }) => {
@@ -144,15 +152,39 @@ const TambahBerita = ({ fetchData }) => {
 							control={form.control}
 							name="tanggal"
 							render={({ field }) => (
-								<FormItem>
+								<FormItem className="flex flex-col">
 									<FormLabel>Tanggal</FormLabel>
-									<FormControl>
-										<Input
-											className="flex items-center shadow-none w-full"
-											{...field}
-											type="date"
-										/>
-									</FormControl>
+									<Popover>
+										<PopoverTrigger asChild>
+											<FormControl>
+												<Button
+													variant={"outline"}
+													className={cn(
+														"w-full pl-3 text-left font-normal",
+														!field.value && "text-muted-foreground"
+													)}
+												>
+													{field.value ? (
+														formatDateToISO(field.value, "PPP")
+													) : (
+														<span>Pilih tanggal</span>
+													)}
+													<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+												</Button>
+											</FormControl>
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0" align="start">
+											<Calendar
+												mode="single"
+												selected={field.value}
+												onSelect={field.onChange}
+												disabled={(date) =>
+													date > new Date() || date < new Date("1900-01-01")
+												}
+												initialFocus
+											/>
+										</PopoverContent>
+									</Popover>
 									<FormMessage />
 								</FormItem>
 							)}

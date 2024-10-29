@@ -48,6 +48,7 @@ const Berita = () => {
 	const [columnVisibility, setColumnVisibility] = useState({});
 	const [rowSelection, setRowSelection] = useState({});
 	const [openHapus, setOpenHapus] = useState(false);
+	const [selectedId, setSelectedId] = useState(null);
 
 	const token = Cookies.get("token");
 	const user = token ? jwtDecode(token) : null;
@@ -57,15 +58,16 @@ const Berita = () => {
 			const response = await axios.get("http://localhost:8000/post");
 			const data = response.data.data.postData;
 			setData(data);
-			console.log("ini datanya :", data);
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
 	};
 
-	const handleDelete = async (id) => {
+	const handleDelete = async () => {
 		try {
-			const response = await axios.delete(`http://localhost:8000/post/${id}`);
+			const response = await axios.delete(
+				`http://localhost:8000/post/${selectedId}`
+			);
 			if (response.status === 200) {
 				toast.success("Berita berhasil dihapus");
 				setOpenHapus(false);
@@ -78,6 +80,11 @@ const Berita = () => {
 	};
 
 	const columns = [
+		{
+			accessorKey: "id",
+			header: "ID",
+			cell: ({ row }) => <div className="lowercase">{row.getValue("id")}</div>,
+		},
 		{
 			accessorKey: "judul",
 			header: "Judul",
@@ -161,7 +168,10 @@ const Berita = () => {
 									variant="outline"
 									size="icon"
 									className="shadow-none "
-									onClick={() => setOpenHapus(true)}
+									onClick={() => {
+										setOpenHapus(true);
+										setSelectedId(id); // Simpan ID yang akan dihapus
+									}}
 								>
 									<Trash2 />
 								</Button>

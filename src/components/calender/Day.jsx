@@ -1,7 +1,7 @@
 /* eslint-disable react/prop-types */
 import GlobalContext from "@/context/GlobalContext";
 import dayjs from "dayjs";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState, useCallback } from "react";
 
 export default function Day({ day, rowIdx }) {
 	const [dayEvents, setDayEvents] = useState([]);
@@ -13,24 +13,26 @@ export default function Day({ day, rowIdx }) {
 	} = useContext(GlobalContext);
 
 	useEffect(() => {
-		const events = filteredEvents.filter(
-			(evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
+		setDayEvents(
+			filteredEvents.filter(
+				(evt) => dayjs(evt.day).format("DD-MM-YY") === day.format("DD-MM-YY")
+			)
 		);
-		setDayEvents(events);
 	}, [filteredEvents, day]);
 
-	function getCurrentDayClass() {
+	const getCurrentDayClass = useCallback(() => {
 		return day.format("DD-MM-YY") === dayjs().format("DD-MM-YY")
-			? "bg-blue-600 text-white rounded-full w-7"
+			? "bg-gray-500 text-white rounded-md w-7"
 			: "";
-	}
+	}, [day]);
+
 	return (
 		<div className="border border-gray-200 flex flex-col">
-			<header className="flex flex-col items-center">
+			<header className="flex flex-col items-center mt-2">
 				{rowIdx === 0 && (
 					<p className="text-sm mt-1">{day.format("ddd").toUpperCase()}</p>
 				)}
-				<p className={`text-sm p-1 my-1 text-center  ${getCurrentDayClass()}`}>
+				<p className={`text-sm p-1 my-1 text-center ${getCurrentDayClass()}`}>
 					{day.format("DD")}
 				</p>
 			</header>

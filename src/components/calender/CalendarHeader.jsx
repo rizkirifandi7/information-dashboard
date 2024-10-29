@@ -17,7 +17,7 @@ export default function CalendarHeader() {
 	}
 	return (
 		<header className="flex items-center">
-			<Button onClick={handleReset} className="border rounded py-2 px-4 mr-5">
+			<Button onClick={handleReset} className="py-2 px-4 mr-5">
 				Today
 			</Button>
 			<button onClick={handlePrevMonth}>

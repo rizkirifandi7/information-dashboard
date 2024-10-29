@@ -1,5 +1,7 @@
 import GlobalContext from "@/context/GlobalContext";
 import { useContext, useState } from "react";
+import { Button } from "../ui/button";
+import { X } from "lucide-react";
 
 const labelsClasses = ["indigo", "gray", "green", "blue", "red", "purple"];
 
@@ -42,23 +44,9 @@ export default function EventModal() {
 						drag_handle
 					</span>
 					<div>
-						{selectedEvent && (
-							<span
-								onClick={() => {
-									dispatchCalEvent({
-										type: "delete",
-										payload: selectedEvent,
-									});
-									setShowEventModal(false);
-								}}
-								className="material-icons-outlined text-gray-400 cursor-pointer"
-							>
-								delete
-							</span>
-						)}
 						<button onClick={() => setShowEventModal(false)}>
 							<span className="material-icons-outlined text-gray-400">
-								close
+								<X />
 							</span>
 						</button>
 					</div>
@@ -111,14 +99,25 @@ export default function EventModal() {
 						</div>
 					</div>
 				</div>
-				<footer className="flex justify-end border-t p-3 mt-5">
-					<button
-						type="submit"
-						onClick={handleSubmit}
-						className="bg-blue-500 hover:bg-blue-600 px-6 py-2 rounded text-white"
-					>
+				<footer className="flex justify-end border-t p-3 mt-5 gap-2">
+					{selectedEvent && (
+						<Button
+							onClick={() => {
+								dispatchCalEvent({
+									type: "delete",
+									payload: selectedEvent,
+								});
+								setShowEventModal(false);
+							}}
+							className="capitalize px-6 py-2"
+							type="destructive"
+						>
+							delete
+						</Button>
+					)}
+					<Button type="submit" onClick={handleSubmit} className="px-6 py-2">
 						Save
-					</button>
+					</Button>
 				</footer>
 			</form>
 		</div>

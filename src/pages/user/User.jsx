@@ -46,6 +46,7 @@ const User = () => {
 	const [columnVisibility, setColumnVisibility] = useState({});
 	const [rowSelection, setRowSelection] = useState({});
 	const [openHapus, setOpenHapus] = useState(false);
+	const [selectedId, setSelectedId] = useState(null);
 
 	const fetchData = async () => {
 		try {
@@ -57,9 +58,11 @@ const User = () => {
 		}
 	};
 
-	const handleDelete = async (id) => {
+	const handleDelete = async () => {
 		try {
-			const response = await axios.delete(`http://localhost:8000/user/${id}`);
+			const response = await axios.delete(
+				`http://localhost:8000/user/${selectedId}`
+			);
 			if (response.status === 200) {
 				toast.success("Berita berhasil dihapus");
 				setOpenHapus(false);
@@ -117,7 +120,10 @@ const User = () => {
 									variant="outline"
 									size="icon"
 									className="shadow-none "
-									onClick={() => setOpenHapus(true)}
+									onClick={() => {
+										setOpenHapus(true);
+										setSelectedId(id); // Simpan ID yang akan dihapus
+									}}
 								>
 									<Trash2 />
 								</Button>

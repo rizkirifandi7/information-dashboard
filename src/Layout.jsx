@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Routes, Route, useLocation, Link } from "react-router-dom";
 import Home from "./pages/home/Home";
 import { SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -26,11 +27,21 @@ import { jwtDecode } from "jwt-decode";
 const Layout = () => {
 	const location = useLocation();
 	const isLoginPage = location.pathname === "/login";
-	const token = Cookies.get("token");
-	const user = token ? jwtDecode(token) : null;
+	const [user, setUser] = useState(null);
+
+	useEffect(() => {
+		const token = Cookies.get("token");
+		if (token) {
+			const decodedUser = jwtDecode(token);
+			setUser(decodedUser);
+		} else {
+			setUser(null);
+		}
+	}, [location.pathname]); // Re-run effect when the pathname changes
 
 	const RemoveCookies = () => {
 		Cookies.remove("token");
+		setUser(null); // Update user state when logging out
 	};
 
 	return (
@@ -81,7 +92,10 @@ const Layout = () => {
 									path="/undangan"
 									element={<PrivateRoute element={Undangan} />}
 								/>
-								<Route path="/user" element={<PrivateRoute element={User} />} />
+								<Route
+									path="/user"
+									element={<PrivateRoute element={User} userRole="admin" />}
+								/>
 							</Routes>
 						</main>
 					</SidebarInset>

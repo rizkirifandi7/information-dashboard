@@ -1,13 +1,19 @@
+import { jwtDecode } from "jwt-decode";
 import Piket from "../piket/Piket";
 import Undangan from "../undangan/Undangan";
 import axios from "axios";
 import { useEffect, useState } from "react";
+import Cookies from "js-cookie";
 
 const Home = () => {
 	const [users, setUsers] = useState([]);
 	const [news, setNews] = useState([]);
 	const [piket, setPiket] = useState([]);
 	const [undangan, setUndangan] = useState([]);
+	const [jadwalKegiatan, setJadwalKegiatan] = useState([]);
+
+	const token = Cookies.get("token");
+	const user = token ? jwtDecode(token) : null;
 
 	const fetchUsers = async () => {
 		try {
@@ -30,7 +36,16 @@ const Home = () => {
 	const fetchPiket = async () => {
 		try {
 			const response = await axios.get("http://localhost:8000/piket");
-			setPiket(response.data.data.piketData);
+			if (user.role === "pegawai") {
+				const piketData = response.data.data.piketData;
+				const filteredPiket = piketData.filter(
+					(piket) => piket.nama === user.nama
+				);
+				setPiket(filteredPiket);
+				return;
+			} else if (user.role === "admin") {
+				setPiket(response.data.data.piketData);
+			}
 		} catch (error) {
 			console.error("Error fetching piket:", error);
 		}
@@ -45,11 +60,21 @@ const Home = () => {
 		}
 	};
 
+	const fetchJadwalKegiatan = async () => {
+		try {
+			const response = await axios.get("http://localhost:8000/jadwal");
+			setJadwalKegiatan(response.data.data.jadwalData);
+		} catch (error) {
+			console.error("Error fetching jadwal kegiatan:", error);
+		}
+	};
+
 	useEffect(() => {
 		fetchUsers();
 		fetchNews();
 		fetchPiket();
 		fetchUndangan();
+		fetchJadwalKegiatan();
 	}, []);
 
 	return (
@@ -57,10 +82,19 @@ const Home = () => {
 			<h1 className="text-xl font-bold">Dashboard Home</h1>
 			<div className="flex flex-col gap-4 pt-6 h-full">
 				<div className="grid auto-rows-min gap-4 md:grid-cols-4">
-					<div className="flex flex-col items-start justify-center gap-2 w-full h-32 p-4 rounded-xl border border-gray-300">
-						<p className="font-bold text-sm text-gray-600">Total User</p>
-						<p className="text-3xl font-bold">{users.length}</p>
-					</div>
+					{user.role === "admin" ? (
+						<div className="flex flex-col items-start justify-center gap-2 w-full h-32 p-4 rounded-xl border border-gray-300">
+							<p className="font-bold text-sm text-gray-600">Total User</p>
+							<p className="text-3xl font-bold">{users.length}</p>
+						</div>
+					) : (
+						<div className="flex flex-col items-start justify-center gap-2 w-full h-32 p-4 rounded-xl border border-gray-300">
+							<p className="font-bold text-sm text-gray-600">
+								Total Jadwal Kegiatan
+							</p>
+							<p className="text-3xl font-bold">{jadwalKegiatan.length}</p>
+						</div>
+					)}
 					<div className="flex flex-col items-start justify-center gap-2 w-full h-32 p-4 rounded-xl border border-gray-300">
 						<p className="font-bold text-sm text-gray-600">Total Berita</p>
 						<p className="text-3xl font-bold">{news.length}</p>

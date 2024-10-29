@@ -38,6 +38,8 @@ import {
 } from "@/components/ui/dialog";
 import { UpdatePiket } from "./UpdatePiket";
 import { toast } from "sonner";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 const Piket = () => {
 	const [data, setData] = React.useState([]);
@@ -46,21 +48,32 @@ const Piket = () => {
 	const [columnVisibility, setColumnVisibility] = React.useState({});
 	const [rowSelection, setRowSelection] = React.useState({});
 	const [openHapus, setOpenHapus] = React.useState(false);
+	const [selectedId, setSelectedId] = React.useState(null);
+
+	const token = Cookies.get("token");
+	const user = token ? jwtDecode(token) : null;
 
 	const fetchData = async () => {
 		try {
 			const response = await axios.get(`http://localhost:8000/piket`);
 			const data = response.data.data.piketData;
-			setData(data);
-			console.log("ini datanya :", data);
+
+			if (user.role === "pegawai") {
+				const filteredData = data.filter((item) => item.nama === user.nama);
+				setData(filteredData);
+			} else {
+				setData(data);
+			}
 		} catch (error) {
 			console.error("Error fetching data:", error);
 		}
 	};
 
-	const handleDelete = async (id) => {
+	const handleDelete = async () => {
 		try {
-			const response = await axios.delete(`http://localhost:8000/piket/${id}`);
+			const response = await axios.delete(
+				`http://localhost:8000/piket/${selectedId}`
+			);
 			if (response.status === 200) {
 				toast.success("Berita berhasil dihapus");
 				setOpenHapus(false);
@@ -180,7 +193,10 @@ const Piket = () => {
 									variant="outline"
 									size="icon"
 									className="shadow-none "
-									onClick={() => setOpenHapus(true)}
+									onClick={() => {
+										setOpenHapus(true);
+										setSelectedId(id); // Simpan ID yang akan dihapus
+									}}
 								>
 									<Trash2Icon />
 								</Button>

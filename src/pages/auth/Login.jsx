@@ -55,13 +55,14 @@ const Login = () => {
 			);
 
 			if (response.data.data.token) {
-				Cookies.set("token", response.data.data.token, { expires: 7 });
+				Cookies.set("token", response.data.data.token, { expires: 6 });
 				toast.success("Login berhasil");
 				navigate("/");
 			} else {
-				toast.error("Anda tidak memiliki akses.");
+				toast.error("Email atau password salah");
 			}
 		} catch (error) {
+			toast.error("Email atau password salah");
 			console.error("Error login:", error);
 		}
 	};

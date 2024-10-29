@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
 	DialogContent,
 	DialogDescription,
@@ -18,16 +19,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from "@/components/ui/popover";
+import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatDateToISO } from "@/lib/formatDate";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Dialog, DialogTrigger } from "@radix-ui/react-dialog";
 import axios from "axios";
-import { PlusCircle } from "lucide-react";
+import { CalendarIcon, PlusCircle } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -38,7 +46,7 @@ const FormSchema = z.object({
 	jenis_piket: z.string().nonempty("Jenis piket harus diisi."),
 	status_absen: z.string().nonempty("Status absen harus diisi."),
 	foto_absen: z.any(),
-	tgl_piket: z.string().nonempty("Tanggal piket harus diisi."),
+	tgl_piket: z.any(),
 });
 
 const TambahPiket = ({ fetchData }) => {
@@ -187,15 +195,39 @@ const TambahPiket = ({ fetchData }) => {
 							control={form.control}
 							name="tgl_piket"
 							render={({ field }) => (
-								<FormItem>
+								<FormItem className="flex flex-col">
 									<FormLabel>Tanggal</FormLabel>
-									<FormControl>
-										<Input
-											className="flex items-center shadow-none w-full"
-											{...field}
-											type="date"
-										/>
-									</FormControl>
+									<Popover>
+										<PopoverTrigger asChild>
+											<FormControl>
+												<Button
+													variant={"outline"}
+													className={cn(
+														"w-full pl-3 text-left font-normal",
+														!field.value && "text-muted-foreground"
+													)}
+												>
+													{field.value ? (
+														formatDateToISO(field.value, "PPP")
+													) : (
+														<span>Pilih tanggal</span>
+													)}
+													<CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+												</Button>
+											</FormControl>
+										</PopoverTrigger>
+										<PopoverContent className="w-auto p-0" align="start">
+											<Calendar
+												mode="single"
+												selected={field.value}
+												onSelect={field.onChange}
+												disabled={(date) =>
+													date > new Date() || date < new Date("1900-01-01")
+												}
+												initialFocus
+											/>
+										</PopoverContent>
+									</Popover>
 									<FormMessage />
 								</FormItem>
 							)}

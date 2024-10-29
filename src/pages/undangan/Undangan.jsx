@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import TambahUndangan from "./TambahUndangan";
 import Cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { Link } from "react-router-dom";
 
 const Undangan = () => {
 	const [data, setData] = useState([]);
@@ -48,6 +49,7 @@ const Undangan = () => {
 	const [columnVisibility, setColumnVisibility] = useState({});
 	const [rowSelection, setRowSelection] = useState({});
 	const [openHapus, setOpenHapus] = useState(false);
+	const [selectedId, setSelectedId] = useState(null);
 
 	const token = Cookies.get("token");
 	const user = token ? jwtDecode(token) : null;
@@ -63,10 +65,10 @@ const Undangan = () => {
 		}
 	};
 
-	const handleDelete = async (id) => {
+	const handleDelete = async () => {
 		try {
 			const response = await axios.delete(
-				`http://localhost:8000/undangan/${id}`
+				`http://localhost:8000/undangan/${selectedId}`
 			);
 			if (response.status === 200) {
 				toast.success("Berita berhasil dihapus");
@@ -90,9 +92,20 @@ const Undangan = () => {
 		{
 			accessorKey: "dokumen",
 			header: "Dokumen",
-			cell: ({ row }) => (
-				<div className="lowercase py-2">{row.getValue("dokumen")}</div>
-			),
+			cell: ({ row }) => {
+				const filename = row.getValue("dokumen");
+				const url = `http://localhost:8000/undangan/view/${filename}`;
+				return (
+					<Link
+						href={url}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="border p-2 rounded-md"
+					>
+						View Document
+					</Link>
+				);
+			},
 		},
 	];
 
@@ -111,7 +124,10 @@ const Undangan = () => {
 									variant="outline"
 									size="icon"
 									className="shadow-none "
-									onClick={() => setOpenHapus(true)}
+									onClick={() => {
+										setOpenHapus(true);
+										setSelectedId(id); // Simpan ID yang akan dihapus
+									}}
 								>
 									<Trash2 />
 								</Button>
